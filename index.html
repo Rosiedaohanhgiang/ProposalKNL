@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đề xuất: Nâng cấp và Tối ưu hóa Khung Năng lực VIMID</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Oswald', sans-serif;
+            background-color: #111827;
+            /* Changed background image to a more professional one */
+            background-image: linear-gradient(rgba(17, 24, 39, 0.8), rgba(17, 24, 39, 0.9)), url('https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            overflow: hidden;
+            color: #E5E7EB;
+        }
+
+        .presentation-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide-card {
+            width: 90vw;
+            height: 90vh;
+            max-width: 1600px;
+            max-height: 900px;
+            aspect-ratio: 16 / 9;
+            background-color: #1F2937;
+            border-radius: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            position: relative;
+            transition: all 0.5s ease-in-out;
+        }
+
+        .slides-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 2.5rem 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+            transform: scale(0.95);
+            background-size: cover;
+            background-position: center;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        /* Slide backgrounds */
+        /* Changed cover image */
+        .slide-bg-title { background-image: linear-gradient(rgba(26, 35, 126, 0.75), rgba(92, 107, 192, 0.75)), url('https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop'); }
+        .slide-bg-section { background-image: linear-gradient(to top right, #1a237e, #5C6BC0); }
+        .slide-bg-model { background-color: #111827; }
+        .slide-bg-interactive { background-image: radial-gradient(circle, #004D40 0%, #009688 100%); }
+        .slide-bg-summary { background-color: #374151; }
+
+        .slide h1, .slide h2, .slide h3 { font-weight: 600; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
+        .slide h1 { font-size: 3.5rem; line-height: 1.1; }
+        .slide h2 { font-size: 2.75rem; margin-bottom: 1.5rem; }
+        .slide h3 { font-size: 2rem; margin-bottom: 1rem; }
+        .slide p, .slide li { font-size: 1.25rem; line-height: 1.6; font-weight: 300; }
+        .slide ul { list-style-position: inside; text-align: left; max-width: 80%; }
+        .slide ul li { margin-bottom: 0.75rem; }
+        
+        .slide table {
+            width: 100%;
+            font-size: 0.85rem;
+            text-align: left;
+            border-collapse: collapse;
+        }
+        .slide th, .slide td {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #4B5563;
+            vertical-align: top;
+        }
+        .slide th {
+            font-weight: 600;
+            background-color: rgba(92, 107, 192, 0.2);
+        }
+        .slide td ul {
+            padding-left: 1rem;
+            list-style-type: disc;
+            margin: 0;
+        }
+         .slide td ul li {
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+            line-height: 1.4;
+         }
+
+        [contenteditable="true"] { outline: 2px dashed transparent; transition: outline 0.3s; }
+        [contenteditable="true"]:focus { outline: 2px dashed #FF9800; background-color: rgba(255, 152, 0, 0.1); }
+
+        .controls {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .presentation-container:hover .controls { opacity: 1; }
+
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.4);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 3.5rem;
+            height: 3.5rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            pointer-events: all;
+            z-index: 10;
+        }
+        .nav-btn#prev { left: 1rem; }
+        .nav-btn#next { right: 1rem; }
+
+        .toolbar {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 0.5rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            pointer-events: all;
+        }
+        .toolbar button { background: none; border: none; color: #E5E7EB; font-size: 1.25rem; cursor: pointer; transition: color 0.2s; }
+        .toolbar button:hover { color: #FF9800; }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 5rem;
+            width: 100%;
+            text-align: center;
+            pointer-events: all;
+        }
+        #slide-counter {
+            background: rgba(0,0,0,0.5);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+        }
+        
+        .build-item {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            transform: translateY(20px);
+        }
+        
+        .build-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="presentation-container" id="presentation-container">
+        <!-- Slide Card -->
+        <div class="slide-card" id="slide-card">
+            <div class="slides-container" id="slides-container">
+                
+                <!-- Slide 1: Title -->
+                <div class="slide active slide-bg-title" id="slide-1">
+                    <h1 class="text-5xl font-bold text-white leading-tight" contenteditable="true">ĐỀ XUẤT HỢP TÁC CHIẾN LƯỢC</h1>
+                    <h2 class="mt-4 text-4xl text-gray-200" contenteditable="true">Nâng cấp & Tối ưu hóa Khung Năng lực Tích hợp</h2>
+                    <p class="mt-8 text-xl" contenteditable="true">Kính gửi: Ban Lãnh đạo & Phòng Nhân sự VIMID</p>
+                    <p class="text-lg" contenteditable="true">Ngày 28 tháng 9 năm 2025</p>
+                </div>
+
+                <!-- Slide 2: Agenda -->
+                <div class="slide" id="slide-2">
+                    <h2 class="text-4xl" contenteditable="true">Lộ trình Thảo luận</h2>
+                    <ul class="text-left mt-8 text-xl space-y-3 max-w-4xl">
+                        <li class="build-item"><strong class="text-orange-400">0.</strong> Tóm tắt cho Lãnh đạo</li>
+                        <li class="build-item"><strong class="text-orange-400">1.</strong> Bối cảnh & Yêu cầu Chiến lược</li>
+                        <li class="build-item"><strong class="text-orange-400">2.</strong> Giải pháp Nền tảng: Khung Năng lực Tích hợp</li>
+                        <li class="build-item"><strong class="text-orange-400">3.</strong> Năng lực & Kinh nghiệm của Chúng tôi</li>
+                        <li class="build-item"><strong class="text-orange-400">4.</strong> Mô hình Tác động & Giá trị cho VIMID</li>
+                        <li class="build-item"><strong class="text-orange-400">5.</strong> Lộ trình Hợp tác</li>
+                        <li class="build-item"><strong class="text-orange-400">6.</strong> Bước tiếp theo & Thảo luận</li>
+                    </ul>
+                </div>
+                
+                <!-- NEW Slide 3: Executive Summary -->
+                <div class="slide" id="slide-3">
+                    <h2 class="text-4xl" contenteditable="true">Tóm tắt cho Lãnh đạo</h2>
+                    <div class="w-full max-w-6xl mt-6 grid grid-cols-3 gap-8 text-left text-base">
+                        <div class="build-item bg-gray-800 p-6 rounded-lg">
+                            <h4 class="text-xl font-bold text-orange-400 mb-2"><i class="fas fa-exclamation-triangle mr-2"></i>Vấn đề Cốt lõi</h4>
+                            <p>Sự thiếu đồng bộ trong hệ thống quản trị nhân tài đang tạo ra "ma sát" vận hành, cản trở việc thực thi chiến lược và làm lãng phí nguồn lực khi VIMID tăng trưởng.</p>
+                        </div>
+                        <div class="build-item bg-gray-800 p-6 rounded-lg">
+                            <h4 class="text-xl font-bold text-orange-400 mb-2"><i class="fas fa-lightbulb mr-2"></i>Giải pháp Chiến lược</h4>
+                            <p>Nâng cấp và tích hợp Khung Năng lực làm "xương sống" để chuẩn hóa và liên kết toàn bộ vòng đời nhân tài, từ tuyển dụng, đánh giá, đến phát triển và kế thừa.</p>
+                        </div>
+                        <div class="build-item bg-green-900/50 p-6 rounded-lg">
+                            <h4 class="text-xl font-bold text-green-300 mb-2"><i class="fas fa-chart-line mr-2"></i>Tác động Kinh doanh</h4>
+                            <p>Đây là một khoản đầu tư mang lại ROI trực tiếp thông qua việc tăng năng suất, giảm chi phí tuyển dụng sai và giữ chân nhân tài, tạo nền tảng vững chắc cho các mục tiêu tăng trưởng.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Part 1: Context -->
+                <div class="slide slide-bg-section" id="slide-4">
+                    <h2 contenteditable="true">1. Bối cảnh & Yêu cầu Chiến lược</h2>
+                    <p class="mt-4 text-xl" contenteditable="true">Tại sao đây là khoản đầu tư chiến lược, không phải chi phí?</p>
+                </div>
+
+                <div class="slide" id="slide-5">
+                    <h3 contenteditable="true">Hiện thực hóa 5 Trụ cột Chiến lược của VIMID</h3>
+                    <p class="mt-2 text-gray-300" contenteditable="true">Dự án này được thiết kế để tạo ra nền tảng vững chắc, giải quyết đồng bộ các mục tiêu Ban Lãnh đạo đã đề ra.</p>
+                    <ul class="mt-6 text-left space-y-2 max-w-4xl text-lg grid grid-cols-2 gap-x-8 gap-y-2">
+                        <li class="build-item p-3 bg-gray-800 rounded-md"><i class="fas fa-bullseye text-orange-400 mr-2"></i>Chuẩn hóa & liên kết hệ thống KPI.</li>
+                        <li class="build-item p-3 bg-gray-800 rounded-md"><i class="fas fa-sitemap text-orange-400 mr-2"></i>Tái cấu trúc tổ chức & phân quyền khoa học.</li>
+                        <li class="build-item p-3 bg-gray-800 rounded-md"><i class="fas fa-users-cog text-orange-400 mr-2"></i>Xây dựng đội ngũ lãnh đạo kế thừa.</li>
+                        <li class="build-item p-3 bg-gray-800 rounded-md"><i class="fas fa-handshake text-orange-400 mr-2"></i>Tái định hình văn hóa hợp tác & hiệu suất cao.</li>
+                        <li class="build-item p-3 bg-gray-800 rounded-md col-span-2"><i class="fas fa-user-check text-orange-400 mr-2"></i>Hoàn thiện mô hình năng lực & quy trình tuyển dụng chiến lược.</li>
+                    </ul>
+                </div>
+
+                <!-- Part 2: Solution -->
+                <div class="slide slide-bg-section" id="slide-6">
+                    <h2 contenteditable="true">2. Giải pháp Nền tảng: Khung Năng lực Tích hợp</h2>
+                    <p class="mt-4 text-xl" contenteditable="true">Xây dựng "xương sống" cho toàn bộ hệ thống quản trị nhân tài.</p>
+                </div>
+
+                <div class="slide" id="slide-7">
+                    <h3>Khung Năng lực là "Hệ điều hành" cho Quản trị Nhân tài</h3>
+                    <p class="mt-2 text-gray-300">Nó tạo ra một ngôn ngữ chung, nhất quán cho mọi hoạt động liên quan đến con người.</p>
+                    <div class="mt-6 w-full max-w-5xl">
+                        
+                    </div>
+                </div>
+
+                <div class="slide" id="slide-8">
+                    <h3>Ứng dụng Tích hợp của Khung Năng lực</h3>
+                    <div class="w-full max-w-6xl mt-4 grid grid-cols-2 gap-6 text-left text-lg">
+                        <div class="build-item bg-gray-800 p-4 rounded-lg">
+                            <h4 class="font-bold text-orange-400"><i class="fas fa-user-plus mr-2"></i>Tuyển dụng</h4>
+                            <p class="mt-1 font-light">Xây dựng bộ câu hỏi phỏng vấn hành vi (BEI) để tuyển đúng người, phù hợp văn hóa.</p>
+                        </div>
+                         <div class="build-item bg-gray-800 p-4 rounded-lg">
+                            <h4 class="font-bold text-orange-400"><i class="fas fa-tasks mr-2"></i>Đánh giá & Lương 3P</h4>
+                            <p class="mt-1 font-light">Đánh giá toàn diện (Kết quả & Hành vi), tạo cơ sở minh bạch cho lương thưởng.</p>
+                        </div>
+                        <div class="build-item bg-gray-800 p-4 rounded-lg">
+                            <h4 class="font-bold text-orange-400"><i class="fas fa-chalkboard-teacher mr-2"></i>Đào tạo & Phát triển</h4>
+                            <p class="mt-1 font-light">Xác định đúng khoảng trống năng lực để thiết kế chương trình đào tạo tập trung, hiệu quả.</p>
+                        </div>
+                        <div class="build-item bg-gray-800 p-4 rounded-lg">
+                            <h4 class="font-bold text-orange-400"><i class="fas fa-chart-line mr-2"></i>Lộ trình Thăng tiến & Kế thừa</h4>
+                            <p class="mt-1 font-light">Xây dựng lộ trình sự nghiệp rõ ràng, xác định và phát triển đội ngũ lãnh đạo tương lai.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Part 3: Why Us -->
+                <div class="slide slide-bg-section" id="slide-9">
+                    <h2 contenteditable="true">3. Năng lực & Kinh nghiệm của Chúng tôi</h2>
+                    <p class="mt-4 text-xl" contenteditable="true">Phương pháp luận độc đáo và sự am hiểu sâu sắc.</p>
+                </div>
+                
+                <div class="slide" id="slide-10">
+                    <h3 contenteditable="true">Triết lý Hợp tác của Chúng tôi</h3>
+                    <div class="w-full max-w-6xl mt-6 grid grid-cols-3 gap-8 text-center">
+                        <div class="build-item p-4">
+                            <div class="text-5xl text-orange-400"><i class="fas fa-drafting-compass"></i></div>
+                            <h4 class="font-semibold text-2xl mt-4">"May đo" Chiến lược</h4>
+                            <p class="text-base mt-2">Không áp dụng máy móc. Mọi giải pháp đều bắt đầu từ việc thấu hiểu sâu sắc chiến lược kinh doanh và 6 giá trị cốt lõi VIMERS.</p>
+                        </div>
+                        <div class="build-item p-4">
+                            <div class="text-5xl text-orange-400"><i class="fas fa-project-diagram"></i></div>
+                            <h4 class="font-semibold text-2xl mt-4">Tư duy Hệ thống Tích hợp</h4>
+                            <p class="text-base mt-2">Xây dựng Khung Năng lực không phải là một dự án nhân sự riêng lẻ, mà là "xương sống" kết nối mọi quy trình quản trị con người.</p>
+                        </div>
+                        <div class="build-item p-4">
+                           <div class="text-5xl text-orange-400"><i class="fas fa-hands-helping"></i></div>
+                            <h4 class="font-semibold text-2xl mt-4">Chuyển giao Bền vững</h4>
+                            <p class="text-base mt-2">Mục tiêu cuối cùng là trang bị và đào tạo để đội ngũ VIMID có thể tự chủ vận hành, cải tiến và làm chủ hoàn toàn hệ thống.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide" id="slide-11">
+                    <h3>Case Study #1: X Group - Xây dựng Nền tảng Tăng trưởng</h3>
+                    <p class="text-lg font-light text-gray-300">Tập đoàn Bất động sản | Chuẩn bị cho IPO</p>
+                    <div class="w-full max-w-6xl mt-6 grid grid-cols-3 gap-8 text-left text-base">
+                        <div class="build-item bg-gray-800 p-6 rounded-lg">
+                            <h4 class="text-xl font-bold text-orange-400 mb-2"><i class="fas fa-map-signs mr-2"></i>Bối cảnh</h4>
+                            <p>Hệ thống nhân sự hoạt động "chữa cháy", thiếu kết nối với chiến lược kinh doanh. Cần một nền tảng quản trị nhân tài bài bản để sẵn sàng cho mục tiêu IPO.</p>
+                        </div>
+                        <div class="build-item bg-gray-800 p-6 rounded-lg">
+                             <h4 class="text-xl font-bold text-orange-400 mb-2"><i class="fas fa-cogs mr-2"></i>Giải pháp</h4>
+                            <p>Xây dựng Khung Năng lực toàn diện (cốt lõi, lãnh đạo, chuyên môn) và tích hợp sâu vào toàn bộ vòng đời nhân tài: Tuyển dụng, Đánh giá, Đào tạo, Kế thừa.</p>
+                        </div>
+                        <div class="build-item bg-gray-800 p-6 rounded-lg">
+                            <h4 class="text-xl font-bold text-orange-400 mb-2"><i class="fas fa-trophy mr-2"></i>Kết quả</h4>
+                            <p>Tạo ra ngôn ngữ chung về hiệu suất, chuẩn hóa quy trình tuyển dụng và đánh giá, xây dựng lộ trình đào tạo tập trung, tạo nền tảng nhân sự vững chắc cho tăng trưởng.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="slide" id="slide-12">
+                    <h3>Case Study #2: Phoenix - Chuyển đổi Năng lực Lãnh đạo</h3>
+                    <p class="text-lg font-light text-gray-300">Tập đoàn Đa ngành | Thích ứng Kỷ nguyên số</p>
+                    <div class="w-full max-w-6xl mt-6 grid grid-cols-3 gap-8 text-left text-base">
+                        <div class="build-item bg-gray-800 p-6 rounded-lg">
+                            <h4 class="text-xl font-bold text-orange-400 mb-2"><i class="fas fa-map-signs mr-2"></i>Bối cảnh</h4>
+                            <p>Năng lực lãnh đạo chưa bắt kịp yêu cầu của chuyển đổi số. "Đường ống" lãnh đạo kế cận yếu và tư duy "silo" cản trở sự đổi mới.</p>
+                        </div>
+                        <div class="build-item bg-gray-800 p-6 rounded-lg">
+                             <h4 class="text-xl font-bold text-orange-400 mb-2"><i class="fas fa-cogs mr-2"></i>Giải pháp</h4>
+                            <p>Đánh giá năng lực lãnh đạo toàn diện (LEI). Thiết kế và triển khai chương trình phát triển lãnh đạo "Flagship" tập trung vào Năng lực số, Tư duy Agile và Hợp tác.</p>
+                        </div>
+                        <div class="build-item bg-green-900/50 p-6 rounded-lg">
+                            <h4 class="text-xl font-bold text-green-300 mb-2"><i class="fas fa-chart-pie mr-2"></i>Kết quả Kinh doanh</h4>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Tỷ lệ bổ nhiệm nội bộ tăng từ <strong class="text-white">28% lên 55%</strong>.</li>
+                                <li>Tỷ lệ nghỉ việc của nhân tài giảm từ <strong class="text-white">21% xuống 9%</strong>.</li>
+                                <li>Thời gian ra mắt sản phẩm mới giảm từ <strong class="text-white">270 xuống 180 ngày</strong>.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Part 4: Benefits & Impact -->
+                <div class="slide slide-bg-section" id="slide-13">
+                    <h2 contenteditable="true">4. Mô hình Tác động & Giá trị cho VIMID</h2>
+                    <p class="mt-4 text-xl" contenteditable="true">Kết nối đầu tư vào con người với kết quả kinh doanh.</p>
+                </div>
+                
+                <div class="slide" id="slide-14">
+                     <h3 contenteditable="true">Mô hình Tác động Kinh doanh</h3>
+                     <p class="mt-2 text-gray-300" contenteditable="true">Cách chúng tôi biến các hành động nhân sự thành ROI có thể đo lường.</p>
+                     <div class="w-full max-w-6xl mt-6 flex items-center justify-between text-base">
+                        <div class="build-item text-center p-4 bg-gray-800 rounded-lg w-1/4">
+                            <i class="fas fa-cogs text-3xl text-orange-400"></i>
+                            <h4 class="font-bold mt-2">Hành động Nhân sự</h4>
+                            <p class="mt-1 font-light">Nâng cấp KNL & Tích hợp</p>
+                        </div>
+                        <i class="fas fa-long-arrow-alt-right text-4xl text-gray-500 mx-4"></i>
+                        <div class="build-item text-center p-4 bg-gray-800 rounded-lg w-1/4">
+                             <i class="fas fa-tachometer-alt text-3xl text-orange-400"></i>
+                             <h4 class="font-bold mt-2">Chỉ số Dẫn dắt (HR)</h4>
+                             <p class="mt-1 font-light">Tỷ lệ tuyển đúng người, % gắn kết, Tỷ lệ nghỉ việc...</p>
+                        </div>
+                        <i class="fas fa-long-arrow-alt-right text-4xl text-gray-500 mx-4"></i>
+                        <div class="build-item text-center p-4 bg-green-900/50 rounded-lg w-2/5">
+                             <i class="fas fa-dollar-sign text-3xl text-green-300"></i>
+                             <h4 class="font-bold mt-2">Kết quả Kinh doanh (CEO)</h4>
+                             <p class="mt-1 font-light">Giảm chi phí vận hành, Tăng năng suất & Lợi nhuận, Tăng trưởng bền vững</p>
+                        </div>
+                     </div>
+                </div>
+
+                <div class="slide" id="slide-15">
+                     <h3>Giá trị VIMID Nhận được</h3>
+                    <ul class="text-left mt-4 text-xl space-y-4 max-w-5xl">
+                        <li class="build-item"><i class="fas fa-check-circle text-green-400 mr-3"></i><strong class="text-orange-400">Tối ưu hóa đầu tư:</strong> Tận dụng và cải tiến hệ thống hiện có thay vì xây mới, giúp tiết kiệm thời gian và chi phí.</li>
+                        <li class="build-item"><i class="fas fa-check-circle text-green-400 mr-3"></i><strong class="text-orange-400">Gắn kết chiến lược:</strong> Hiệu chỉnh Khung Năng lực để kết nối trực tiếp 6 giá trị cốt lõi VIMERS với các hành vi cụ thể, giải quyết triệt để vấn đề "mất kết nối" hiện tại.</li>
+                        <li class="build-item"><i class="fas fa-check-circle text-green-400 mr-3"></i><strong class="text-orange-400">Đón đầu tương lai:</strong> Cập nhật các năng lực tiên tiến theo xu hướng 2025+, đặc biệt là năng lực số và các năng lực chuyên môn cho khối sản xuất & lắp ráp mới.</li>
+                        <li class="build-item"><i class="fas fa-check-circle text-green-400 mr-3"></i><strong class="text-orange-400">Nâng cao hiệu quả ứng dụng:</strong> Chuyển giao bộ công cụ và đào tạo đội ngũ quản lý để đảm bảo khung năng lực được áp dụng nhất quán, giúp đánh giá đúng năng lực nhân viên và tạo ra hệ thống lương 3P hấp dẫn, công bằng hơn.</li>
+                    </ul>
+                </div>
+
+                <!-- Part 5: Plan -->
+                <div class="slide slide-bg-section" id="slide-16">
+                    <h2 contenteditable="true">5. Lộ trình Hợp tác</h2>
+                    <p class="mt-4 text-xl" contenteditable="true">Minh bạch, chi tiết và cam kết hiệu quả.</p>
+                </div>
+
+                <div class="slide" id="slide-17">
+                    <h3>Giai đoạn 1: Khảo sát & Hiệu chỉnh Chiến lược (3 Tuần)</h3>
+                    <table class="mt-4">
+                        <thead>
+                            <tr><th>ID</th><th>Hạng mục</th><th>Mô tả chi tiết</th><th>Sản phẩm đầu ra</th><th>Yêu cầu phối hợp</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>1.1</td><td>Họp khởi động</td><td>Tổ chức buổi họp với Ban Lãnh đạo (BLĐ) để thống nhất mục tiêu dự án theo hướng "Nâng cấp & Tối ưu hóa", phạm vi, và kế hoạch làm việc.</td><td><ul><li>Biên bản họp</li><li>Kế hoạch dự án chi tiết</li></ul></td><td>BLĐ, Ban chỉ đạo dự án, Phòng Nhân sự tham gia.</td></tr>
+                            <tr><td>1.2</td><td>Khảo sát & Phân tích</td><td>Phân tích hệ thống hiện tại, phỏng vấn các Trưởng bộ phận và nhân sự chủ chốt.</td><td><ul><li>Báo cáo phân tích hiện trạng</li><li>Đề xuất định hướng chiến lược</li></ul></td><td><ul><li>Cung cấp tài liệu, dữ liệu</li><li>Sắp xếp lịch phỏng vấn</li></ul></td></tr>
+                            <tr><td>1.3</td><td>Workshop Hiệu chỉnh</td><td>Workshop với BLĐ để thống nhất định hướng, cấu trúc, và các nhóm năng lực chính.</td><td>Định hướng chiến lược cho Khung Năng Lực phiên bản mới.</td><td>BLĐ và các Trưởng bộ phận tham gia.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="slide" id="slide-18">
+                    <h3>Giai đoạn 2: Nâng cấp & Tối ưu hóa Khung Năng lực</h3>
+                     <table class="mt-4">
+                        <thead>
+                            <tr><th>ID</th><th>Hạng mục</th><th>Mô tả chi tiết</th><th>Sản phẩm đầu ra</th><th>Yêu cầu phối hợp</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>2.1</td><td>Workshop Xây dựng</td><td>Workshop cùng đội ngũ quản lý để xây dựng Năng lực Cốt lõi & Lãnh đạo, liên kết với 6 giá trị VIMERS.</td><td><ul><li>Danh mục Năng lực Cốt lõi & Lãnh đạo</li><li>Các hành vi biểu hiện theo từng cấp độ</li></ul></td><td>Các Trưởng bộ phận và nhân sự chủ chốt tham gia.</td></tr>
+                            <tr><td>2.2</td><td>Xây dựng Năng lực Chuyên môn</td><td>Làm việc với từng phòng ban để xây dựng năng lực chuyên môn, đặc biệt cho khối sản xuất mới.</td><td>Từ điển Năng lực Chuyên môn cho các vị trí.</td><td><ul><li>Cung cấp mô tả công việc</li><li>Trưởng bộ phận tham gia phỏng vấn, hiệu chỉnh.</li></ul></td></tr>
+                            <tr><td>2.3</td><td>Hoàn thiện & Chuẩn hóa</td><td>Tổng hợp, chuẩn hóa và hoàn thiện bộ Từ điển Năng lực VIMID.</td><td>Bộ Từ điển Năng lực VIMID hoàn chỉnh.</td><td>Phòng Nhân sự và Ban chỉ đạo phê duyệt.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="slide" id="slide-19">
+                    <h3>Giai đoạn 3: Xây dựng Công cụ & Tích hợp</h3>
+                     <table class="mt-4">
+                        <thead>
+                            <tr><th>ID</th><th>Hạng mục</th><th>Mô tả chi tiết</th><th>Sản phẩm đầu ra</th><th>Yêu cầu phối hợp</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>3.1</td><td>Thiết kế Khung Đánh giá</td><td>Xây dựng biểu mẫu và quy trình đánh giá năng lực, tích hợp vào hệ thống đánh giá hiệu suất tổng thể.</td><td><ul><li>Bộ công cụ đánh giá (biểu mẫu, hướng dẫn)</li><li>Quy trình đánh giá tích hợp</li></ul></td><td>Cung cấp hệ thống đánh giá hiện tại.</td></tr>
+                            <tr><td>3.2</td><td>Xây dựng Lộ trình</td><td>Thiết kế lộ trình phát triển sự nghiệp và kế hoạch kế thừa dựa trên Khung Năng lực.</td><td><ul><li>Khung Lộ trình Phát triển Sự nghiệp</li><li>Ma trận nhân tài tiềm năng (9-Box Grid)</li></ul></td><td>Cung cấp dữ liệu nhân sự và định hướng phát triển.</td></tr>
+                            <tr><td>3.3</td><td>Xây dựng Bộ câu hỏi BEI</td><td>Xây dựng ngân hàng câu hỏi phỏng vấn dựa trên các năng lực trong từ điển.</td><td>Ngân hàng câu hỏi phỏng vấn theo năng lực.</td><td>Phòng Nhân sự và các Trưởng bộ phận tham gia.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="slide" id="slide-20">
+                    <h3>Giai đoạn 4: Chuyển giao & Thí điểm</h3>
+                     <table class="mt-4">
+                        <thead>
+                           <tr><th>ID</th><th>Hạng mục</th><th>Mô tả chi tiết</th><th>Sản phẩm đầu ra</th><th>Yêu cầu phối hợp</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>4.1</td><td>Workshop Chuyển giao</td><td>Workshop với BLĐ để thống nhất về bộ công cụ và kế hoạch triển khai.</td><td>BLĐ thống nhất và cam kết triển khai.</td><td>BLĐ và các Trưởng bộ phận tham gia.</td></tr>
+                            <tr><td>4.2</td><td>Đào tạo Quản lý & HR</td><td>Đào tạo đội ngũ quản lý về các kỹ năng cần thiết để sử dụng hiệu quả hệ thống mới.</td><td>Đội ngũ quản lý nắm vững công cụ.</td><td>Sắp xếp thời gian, địa điểm, triệu tập người tham dự.</td></tr>
+                            <tr><td>4.3</td><td>Thí điểm & Tinh chỉnh</td><td>Lựa chọn 2-3 phòng ban (bao gồm cả nhân sự cho khối sản xuất mới) để triển khai thí điểm và thu thập phản hồi.</td><td><ul><li>Báo cáo tổng kết thí điểm</li><li>Bộ công cụ phiên bản cuối cùng</li></ul></td><td>Các phòng ban được chọn tham gia và cung cấp phản hồi.</td></tr>
+                            <tr><td>4.4</td><td>Bàn giao & Tổng kết</td><td>Hoàn thiện, bàn giao toàn bộ sản phẩm và tổ chức họp tổng kết dự án.</td><td><ul><li>Toàn bộ tài liệu, công cụ của dự án</li><li>Biên bản họp tổng kết</li></ul></td><td>Ban chỉ đạo và Phòng Nhân sự tham gia, xác nhận.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="slide" id="slide-21">
+                    <h3 contenteditable="true">Hình dung về Thành công sau 18 tháng</h3>
+                    <ul class="text-left mt-4 text-xl space-y-4 max-w-4xl">
+                        <li class="build-item"><i class="fas fa-check-circle text-green-400 mr-3"></i>Các buổi phỏng vấn tuyển dụng diễn ra nhất quán, tập trung vào hành vi và có chất lượng cao.</li>
+                        <li class="build-item"><i class="fas fa-check-circle text-green-400 mr-3"></i>Đội ngũ quản lý tự tin sử dụng một ngôn ngữ chung để phản hồi và phát triển nhân viên.</li>
+                        <li class="build-item"><i class="fas fa-check-circle text-green-400 mr-3"></i>Nhân viên hiểu rõ lộ trình phát triển sự nghiệp của mình tại VIMID.</li>
+                        <li class="build-item"><i class="fas fa-check-circle text-green-400 mr-3"></i>Các quyết định về lương thưởng, thăng chức trở nên minh bạch và công bằng hơn.</li>
+                        <li class="build-item"><i class="fas fa-check-circle text-green-400 mr-3"></i>VIMID có sẵn một "đường ống" lãnh đạo kế thừa vững chắc từ nguồn lực nội bộ.</li>
+                    </ul>
+                </div>
+
+                
+                <!-- Part 7: Next Steps -->
+                <div class="slide slide-bg-interactive" id="slide-22">
+                    <h2 contenteditable="true">6. Bước tiếp theo</h2>
+                    <p class="mt-4 text-xl text-gray-200" contenteditable="true">Chúng tôi đã sẵn sàng đồng hành cùng VIMID kiến tạo tương lai.</p>
+                    <button class="mt-8 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-lg text-xl transition-transform transform hover:scale-105">Lên lịch Buổi làm việc Khởi động Dự án</button>
+                </div>
+
+                 <div class="slide" id="slide-23">
+                    <h2 class="text-4xl font-bold text-white" contenteditable="true">Trân trọng cảm ơn và Thảo luận</h2>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- External Controls -->
+        <div class="controls">
+            <button id="prev" class="nav-btn"><i class="fas fa-chevron-left"></i></button>
+            <button id="next" class="nav-btn"><i class="fas fa-chevron-right"></i></button>
+            
+            <div class="progress-bar">
+                <span id="slide-counter">1 / 23</span>
+            </div>
+
+            <div class="toolbar">
+                <button id="export-btn" title="Xuất bản"><i class="fas fa-file-export"></i></button>
+                <button id="presenter-view-btn" title="Chế độ Diễn giả (P)"><i class="fas fa-user-tie"></i></button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Export Modal -->
+    <div id="export-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
+        <div class="bg-gray-800 p-8 rounded-lg shadow-xl w-1/3">
+            <h2 class="text-2xl font-bold mb-4">Xuất Bản Trình Chiếu</h2>
+            <div id="slide-selection" class="max-h-64 overflow-y-auto mb-6">
+                <!-- Slide checkboxes will be inserted here -->
+            </div>
+            <div class="flex justify-end gap-4">
+                <button id="cancel-export" class="bg-gray-600 px-4 py-2 rounded-lg">Hủy</button>
+                <button id="export-pdf" class="bg-indigo-600 px-4 py-2 rounded-lg">Xuất PDF</button>
+                <button id="export-html" class="bg-green-600 px-4 py-2 rounded-lg">Xuất HTML</button>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const slides = document.querySelectorAll('.slide');
+    const nextBtn = document.getElementById('next');
+    const prevBtn = document.getElementById('prev');
+    const slideCounter = document.getElementById('slide-counter');
+    const presenterBtn = document.getElementById('presenter-view-btn');
+
+    let currentSlide = 0;
+    let presenterWindow = null;
+    
+    function showSlide(index, direction) {
+        const previousSlideEl = slides[currentSlide];
+        const buildItems = previousSlideEl.querySelectorAll('.build-item');
+        
+        if (direction === 'next') {
+            const visibleBuildItems = previousSlideEl.querySelectorAll('.build-item.visible');
+            if (buildItems.length > visibleBuildItems.length) {
+                buildItems[visibleBuildItems.length].classList.add('visible');
+                return; 
+            }
+        }
+        
+        if (direction === 'prev') {
+             const visibleBuildItems = previousSlideEl.querySelectorAll('.build-item.visible');
+             if (visibleBuildItems.length > 1 || (buildItems.length > 0 && visibleBuildItems.length > 0) ) {
+                visibleBuildItems[visibleBuildItems.length - 1].classList.remove('visible');
+                return; 
+             }
+        }
+
+        buildItems.forEach(item => item.classList.remove('visible'));
+
+        currentSlide = index;
+        if (currentSlide >= slides.length) currentSlide = 0;
+        if (currentSlide < 0) currentSlide = slides.length - 1;
+
+        slides.forEach((slide) => slide.classList.remove('active'));
+        
+        const newSlideEl = slides[currentSlide];
+        newSlideEl.classList.add('active');
+
+        const newBuildItems = newSlideEl.querySelectorAll('.build-item');
+        if (newBuildItems.length > 0 && direction === 'next') {
+            newBuildItems[0].classList.add('visible');
+        }
+        if (newBuildItems.length > 0 && direction === 'prev') {
+            newBuildItems.forEach(item => item.classList.add('visible'));
+        }
+        
+        updateUI();
+        saveState();
+    }
+    
+    function updateUI() {
+        slideCounter.textContent = `${currentSlide + 1} / ${slides.length}`;
+        if (presenterWindow && !presenterWindow.closed) {
+            updatePresenterWindow();
+        }
+    }
+    
+    function updatePresenterWindow() {
+        if (!presenterWindow || presenterWindow.closed) return;
+
+        const currentSlideHTML = slides[currentSlide].innerHTML;
+        const nextSlideIndex = (currentSlide + 1) % slides.length;
+        const nextSlideHTML = slides[nextSlideIndex].innerHTML;
+        const notes = slides[currentSlide].dataset.notes || "Không có ghi chú cho slide này.";
+
+        presenterWindow.postMessage({
+            type: 'update',
+            currentSlideHTML,
+            nextSlideHTML,
+            notes,
+            currentSlideNum: currentSlide + 1,
+            totalSlides: slides.length
+        }, '*');
+    }
+
+    function openPresenterWindow() {
+        if (presenterWindow && !presenterWindow.closed) {
+            presenterWindow.focus();
+            return;
+        }
+        
+        presenterWindow = window.open('', 'Presenter View', 'width=1200,height=800');
+        
+        presenterWindow.document.body.innerHTML = `
+            <style>
+                body { font-family: sans-serif; background: #222; color: #eee; margin: 0; display: flex; height: 100vh; font-size: 16px; }
+                .main { flex: 2; display: flex; flex-direction: column; border-right: 1px solid #444; }
+                .side { flex: 1; display: flex; flex-direction: column; }
+                .slide-view { flex: 1; padding: 20px; border-bottom: 1px solid #444; overflow-y: auto; }
+                .slide-view.current { font-size: 1.2rem; }
+                .slide-view.next { font-size: 0.8rem; }
+                .slide-view h1 { font-size: 2em; } .slide-view h2 { font-size: 1.5em; }
+                .notes { flex: 1; padding: 20px; overflow-y: auto; background: #2a2a2a;}
+                .timer-bar { padding: 20px; border-bottom: 1px solid #444; text-align: center; }
+                #timer { font-size: 2em; font-weight: bold; }
+                .slide-info { padding: 20px; text-align: center; }
+            </style>
+            <div class="main">
+                <div id="current-slide-view" class="slide-view current"></div>
+            </div>
+            <div class="side">
+                <div class="timer-bar">
+                    <div id="timer">00:00:00</div>
+                </div>
+                <div id="next-slide-view" class="slide-view next"><h3>SLIDE TIẾP THEO</h3></div>
+                <div class="notes">
+                    <h3>GHI CHÚ</h3>
+                    <div id="notes-content"></div>
+                </div>
+                <div class="slide-info" id="slide-info-content"></div>
+            </div>
+        `;
+        
+        let startTime = Date.now();
+        setInterval(() => {
+            if (presenterWindow && !presenterWindow.closed) {
+                const elapsed = new Date(Date.now() - startTime);
+                const hours = String(elapsed.getUTCHours()).padStart(2, '0');
+                const minutes = String(elapsed.getUTCMinutes()).padStart(2, '0');
+                const seconds = String(elapsed.getUTCSeconds()).padStart(2, '0');
+                presenterWindow.document.getElementById('timer').textContent = `${hours}:${minutes}:${seconds}`;
+            }
+        }, 1000);
+        
+        window.addEventListener('message', e => {
+            if (e.source === presenterWindow) {
+                 if (e.data.type === 'nav') {
+                    if (e.data.direction === 'next') showSlide(currentSlide + 1, 'next');
+                    if (e.data.direction === 'prev') showSlide(currentSlide - 1, 'prev');
+                }
+            }
+        });
+        
+        window.addEventListener('beforeunload', () => {
+             if (presenterWindow && !presenterWindow.closed) {
+                 presenterWindow.close();
+             }
+        });
+
+        updatePresenterWindow();
+    }
+    
+     window.addEventListener('message', e => {
+        if (e.data.type === 'update') {
+            document.getElementById('current-slide-view').innerHTML = e.data.currentSlideHTML;
+            document.getElementById('next-slide-view').innerHTML = `<h3>SLIDE TIẾP THEO</h3> ${e.data.nextSlideHTML}`;
+            document.getElementById('notes-content').textContent = e.data.notes;
+            document.getElementById('slide-info-content').textContent = `Slide ${e.data.currentSlideNum} / ${e.data.totalSlides}`;
+        }
+    });
+
+    nextBtn.addEventListener('click', () => showSlide(currentSlide + 1, 'next'));
+    prevBtn.addEventListener('click', () => showSlide(currentSlide - 1, 'prev'));
+    presenterBtn.addEventListener('click', openPresenterWindow);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+            e.preventDefault();
+            showSlide(currentSlide + 1, 'next');
+        } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            showSlide(currentSlide - 1, 'prev');
+        } else if (e.key.toLowerCase() === 'p') {
+            e.preventDefault();
+            openPresenterWindow();
+        }
+    });
+    
+    function saveState() {
+        const state = {
+            currentSlide: currentSlide,
+            content: {}
+        };
+        slides.forEach((slide, index) => {
+            const editableElements = slide.querySelectorAll('[contenteditable="true"]');
+            editableElements.forEach((el, elIndex) => {
+                const key = `slide-${index}-el-${elIndex}`;
+                state.content[key] = el.innerHTML;
+            });
+        });
+        localStorage.setItem('presentationState_proposal_final_v6', JSON.stringify(state));
+    }
+    
+    function loadState() {
+        const state = JSON.parse(localStorage.getItem('presentationState_proposal_final_v6'));
+        if (!state) return;
+        
+        slides.forEach((slide, index) => {
+             const editableElements = slide.querySelectorAll('[contenteditable="true"]');
+            editableElements.forEach((el, elIndex) => {
+                const key = `slide-${index}-el-${elIndex}`;
+                if (state.content[key]) {
+                    el.innerHTML = state.content[key];
+                }
+            });
+        });
+
+        setTimeout(() => {
+            currentSlide = state.currentSlide || 0;
+            // Make sure currentSlide is not out of bounds after removing a slide
+            if (currentSlide >= slides.length) {
+                currentSlide = slides.length - 1;
+            }
+            slides.forEach(s => s.classList.remove('active'));
+            slides[currentSlide].classList.add('active');
+            updateUI();
+        }, 100);
+    }
+    
+    document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+        el.addEventListener('blur', saveState);
+    });
+
+    // --- Export Logic ---
+    const exportBtn = document.getElementById('export-btn');
+    const exportModal = document.getElementById('export-modal');
+    const cancelExportBtn = document.getElementById('cancel-export');
+    const exportHtmlBtn = document.getElementById('export-html');
+    const exportPdfBtn = document.getElementById('export-pdf');
+    const slideSelectionContainer = document.getElementById('slide-selection');
+
+    exportBtn.addEventListener('click', () => {
+        slideSelectionContainer.innerHTML = '';
+        slides.forEach((slide, index) => {
+            const titleEl = slide.querySelector('h1, h2, h3');
+            const title = titleEl ? titleEl.textContent.trim().substring(0, 50) + '...' : `Slide ${index + 1}`;
+            const checkbox = `
+                <div class="flex items-center mb-2">
+                    <input type="checkbox" id="select-slide-${index}" data-slide-index="${index}" class="form-checkbox h-5 w-5 text-indigo-600" checked>
+                    <label for="select-slide-${index}" class="ml-3 text-gray-300">${title}</label>
+                </div>`;
+            slideSelectionContainer.innerHTML += checkbox;
+        });
+        exportModal.classList.remove('hidden');
+    });
+
+    cancelExportBtn.addEventListener('click', () => exportModal.classList.add('hidden'));
+
+    exportHtmlBtn.addEventListener('click', () => {
+        alert('Chức năng Xuất HTML đang được phát triển!');
+    });
+
+    exportPdfBtn.addEventListener('click', async () => {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+            orientation: 'landscape',
+            unit: 'px',
+            format: [1600, 900]
+        });
+
+        const selectedIndices = Array.from(slideSelectionContainer.querySelectorAll('input:checked'))
+                                      .map(cb => parseInt(cb.dataset.slideIndex));
+        
+        for (const index of selectedIndices) {
+            const slide = slides[index];
+            const buildItems = slide.querySelectorAll('.build-item');
+            buildItems.forEach(item => item.classList.add('visible'));
+
+            const canvas = await html2canvas(slide, { scale: 2 });
+            const imgData = canvas.toDataURL('image/png');
+            pdf.addImage(imgData, 'PNG', 0, 0, 1600, 900);
+            if (index !== selectedIndices[selectedIndices.length - 1]) {
+                pdf.addPage();
+            }
+        }
+        
+        pdf.save('VIMID_Proposal.pdf');
+        exportModal.classList.add('hidden');
+    });
+
+    // Initial load
+    loadState();
+    if (!localStorage.getItem('presentationState_proposal_final_v6')) {
+        showSlide(0, 'next');
+    }
+});
+</script>
+
+</body>
+</html>
+
